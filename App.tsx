@@ -1,94 +1,84 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { ViewType, Viatura, Ocorrencia, Abastecimento, ViaturaTipo } from './types';
-import { INITIAL_VIATURAS, INITIAL_OCORRENCIAS, INITIAL_ABASTECIMENTOS } from './constants';
+import React, { useState } from 'react';
+import { ViewType } from './types';
+import BottomNav from './components/BottomNav';
 import HomeView from './views/HomeView';
 import OcorrenciasView from './views/OcorrenciasView';
 import ViaturasView from './views/ViaturasView';
-import NovaViaturaView from './views/NovaViaturaView';
+import EstatisticasView from './views/EstatisticasView';
 import DetalheViaturaView from './views/DetalheViaturaView';
+import NovaViaturaView from './views/NovaViaturaView';
 import HistoricoAbastecimentoView from './views/HistoricoAbastecimentoView';
 import LancarAbastecimentoView from './views/LancarAbastecimentoView';
-import EstatisticasView from './views/EstatisticasView';
-import BottomNav from './components/BottomNav';
+import LoginView from './views/LoginView';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { INITIAL_VIATURAS, INITIAL_ABASTECIMENTOS } from './constants';
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
+  const { user, loading } = useAuth();
   const [currentView, setCurrentView] = useState<ViewType>('HOME');
-  const [viaturas, setViaturas] = useState<Viatura[]>(INITIAL_VIATURAS);
-  const [ocorrencias, setOcorrencias] = useState<Ocorrencia[]>(INITIAL_OCORRENCIAS);
-  const [abastecimentos, setAbastecimentos] = useState<Abastecimento[]>(INITIAL_ABASTECIMENTOS);
-  const [selectedViaturaId, setSelectedViaturaId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | undefined>();
 
-  // Sync state with local storage or simply keep in memory for this demo
-  
-  const selectedViatura = useMemo(() => 
-    viaturas.find(v => v.id === selectedViaturaId), 
-    [viaturas, selectedViaturaId]
-  );
-
-  const navigateTo = (view: ViewType, id?: string) => {
-    if (id) setSelectedViaturaId(id);
+  const handleNavigate = (view: ViewType, id?: string) => {
     setCurrentView(view);
+    if (id) setSelectedId(id);
     window.scrollTo(0, 0);
   };
 
-  const addViatura = (v: Omit<Viatura, 'id' | 'odometro' | 'combustivel' | 'status' | 'modelo'>) => {
-    const newV: Viatura = {
-      ...v,
-      id: Math.random().toString(36).substr(2, 9),
-      odometro: 0,
-      combustivel: 100,
-      status: 'Operacional',
-      modelo: 'Não especificado'
-    };
-    setViaturas([...viaturas, newV]);
-    setCurrentView('VIATURAS');
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background-dark flex items-center justify-center">
+        <span className="material-icons animate-spin text-primary text-4xl">refresh</span>
+      </div>
+    );
+  }
 
-  const addAbastecimento = (a: Omit<Abastecimento, 'id'>) => {
-    const newA: Abastecimento = {
-      ...a,
-      id: Math.random().toString(36).substr(2, 9),
-    };
-    setAbastecimentos([newA, ...abastecimentos]);
-    
-    // Update vehicle odometer
-    setViaturas(prev => prev.map(v => v.id === a.viaturaId ? { ...v, odometro: a.odometro } : v));
-    
-    setCurrentView('HISTORICO_ABASTECIMENTO');
-  };
+  if (!user) {
+    return <LoginView />;
+  }
 
   const renderView = () => {
+    // Fallback for props until views are refactored
+    const viatura = INITIAL_VIATURAS.find(v => v.id === selectedId) || INITIAL_VIATURAS[0];
+
     switch (currentView) {
       case 'HOME':
-        return <HomeView onNavigate={navigateTo} />;
+        return <HomeView onNavigate={handleNavigate} />;
       case 'OCORRENCIAS':
-        return <OcorrenciasView onNavigate={navigateTo} ocorrencias={ocorrencias} />;
+        // Passing props for now, will remove later
+        return <OcorrenciasView onNavigate={handleNavigate} />;
       case 'VIATURAS':
-        return <ViaturasView onNavigate={navigateTo} viaturas={viaturas} />;
-      case 'NOVA_VIATURA':
-        return <NovaViaturaView onNavigate={navigateTo} onSave={addViatura} />;
-      case 'DETALHE_VIATURA':
-        return selectedViatura ? <DetalheViaturaView onNavigate={navigateTo} viatura={selectedViatura} ocorrencias={ocorrencias} /> : <HomeView onNavigate={navigateTo} />;
-      case 'HISTORICO_ABASTECIMENTO':
-        return selectedViatura ? <HistoricoAbastecimentoView onNavigate={navigateTo} viatura={selectedViatura} abastecimentos={abastecimentos.filter(a => a.viaturaId === selectedViatura.id)} /> : <HomeView onNavigate={navigateTo} />;
-      case 'NOVO_ABASTECIMENTO':
-        return selectedViatura ? <LancarAbastecimentoView onNavigate={navigateTo} viatura={selectedViatura} onSave={addAbastecimento} /> : <HomeView onNavigate={navigateTo} />;
+        return <ViaturasView onNavigate={handleNavigate} />;
       case 'ESTATISTICAS':
-        return <EstatisticasView onNavigate={navigateTo} ocorrencias={ocorrencias} viaturas={viaturas} />;
+        return <EstatisticasView onNavigate={handleNavigate} />;
+      case 'DETALHE_VIATURA':
+        return <DetalheViaturaView onNavigate={handleNavigate} viaturaId={selectedId} />;
+      case 'NOVA_VIATURA':
+        return <NovaViaturaView onNavigate={handleNavigate} />;
+      case 'HISTORICO_ABASTECIMENTO':
+        return <HistoricoAbastecimentoView onNavigate={handleNavigate} viatura={viatura} abastecimentos={INITIAL_ABASTECIMENTOS.filter(a => a.viaturaId === viatura.id)} />;
+      case 'NOVO_ABASTECIMENTO':
+        return <LancarAbastecimentoView onNavigate={handleNavigate} viatura={viatura} onSave={() => handleNavigate('HISTORICO_ABASTECIMENTO', viatura.id)} />;
       default:
-        return <HomeView onNavigate={navigateTo} />;
+        return <HomeView onNavigate={handleNavigate} />;
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col max-w-md mx-auto relative bg-background-dark overflow-hidden shadow-2xl">
       {renderView()}
-      
-      {['HOME', 'OCORRENCIAS', 'VIATURAS', 'ESTATISTICAS'].includes(currentView) && (
-        <BottomNav currentView={currentView} onNavigate={navigateTo} />
+      {(currentView === 'HOME' || currentView === 'OCORRENCIAS' || currentView === 'VIATURAS' || currentView === 'ESTATISTICAS' || currentView === 'PERFIL') && (
+        <BottomNav currentView={currentView} onNavigate={handleNavigate} />
       )}
     </div>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 };
 

@@ -13,7 +13,7 @@ export const getViaturas = async (): Promise<Viatura[]> => {
         return [];
     }
 
-    return data.map((v: any) => ({
+    return (data || []).map((v: any) => ({
         ...v,
         // Ensure types match enum if necessary, or just cast
         tipo: v.tipo as ViaturaTipo,

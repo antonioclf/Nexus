@@ -16,9 +16,14 @@ const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await getViaturas();
-      setViaturas(data);
-      setLoading(false);
+      try {
+        const data = await getViaturas();
+        setViaturas(data);
+      } catch (error) {
+        console.error("Failed to load viaturas", error);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchData();
   }, []);

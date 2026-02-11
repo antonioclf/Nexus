@@ -3,14 +3,12 @@ import React, { useEffect, useState } from 'react';
 import { ViewType, Viatura } from '../types';
 import { getViaturas } from '../services/viaturaService';
 import Layout from '../components/Layout';
-import { useAuth } from '../contexts/AuthContext';
 
 interface HomeViewProps {
   onNavigate: (view: ViewType, id?: string) => void;
 }
 
 const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
-  const { signOut } = useAuth();
   const [viaturas, setViaturas] = useState<Viatura[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -46,11 +44,8 @@ const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
             </div>
           </div>
           <div className="flex gap-2">
-            <button onClick={() => signOut()} className="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-700 transition-colors">
-              <span className="material-icons text-sm">logout</span>
-            </button>
             <div className="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center overflow-hidden border-2 border-zinc-700">
-              <span className="material-icons text-zinc-400">person</span>
+              <span className="material-icons text-zinc-400">shield</span>
             </div>
           </div>
         </div>

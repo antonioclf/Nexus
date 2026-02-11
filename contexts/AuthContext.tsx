@@ -1,6 +1,5 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '../supabaseClient';
 import { Session, User } from '@supabase/supabase-js';
 
 interface AuthContextType {
@@ -11,56 +10,46 @@ interface AuthContextType {
     signOut: () => Promise<{ error: any }>;
 }
 
+// Mock user for free access
+const MOCK_USER: User = {
+    id: 'free-access-user',
+    email: 'acesso@nexus.com',
+    app_metadata: {},
+    user_metadata: { full_name: 'Acesso Livre' },
+    aud: 'authenticated',
+    created_at: new Date().toISOString(),
+} as User;
+
 const AuthContext = createContext<AuthContextType>({
     session: null,
-    user: null,
-    loading: true,
+    user: MOCK_USER,
+    loading: false,
     signIn: async () => ({ error: null }),
     signOut: async () => ({ error: null }),
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-    const [session, setSession] = useState<Session | null>(null);
-    const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true);
+    // Start with the mock user immediately
+    const [user] = useState<User | null>(MOCK_USER);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setSession(session);
-            setUser(session?.user ?? null);
-            setLoading(false);
-        });
-
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setSession(session);
-            setUser(session?.user ?? null);
-            setLoading(false);
-        });
-
-        return () => subscription.unsubscribe();
+        // No longer needed to check Supabase session
+        setLoading(false);
     }, []);
 
-    const signIn = async (matricula: string, senha: string) => {
-        // Basic mapping for the specific user requested
-        // In a real scenario, this might need a more robust lookup or just use email directly
-        const email = matricula === '1822527' ? '1822527@cbmmg.mg.gov.br' : matricula;
-
-        // Attempt sign in
-        const { error } = await supabase.auth.signInWithPassword({
-            email: email,
-            password: senha,
-        });
-
-        return { error };
+    const signIn = async () => {
+        // No-op for free access
+        return { error: null };
     };
 
     const signOut = async () => {
-        const { error } = await supabase.auth.signOut();
-        return { error };
+        // No-op for free access
+        return { error: null };
     };
 
     return (
-        <AuthContext.Provider value={{ session, user, loading, signIn, signOut }}>
+        <AuthContext.Provider value={{ session: null, user, loading, signIn, signOut }}>
             {children}
         </AuthContext.Provider>
     );

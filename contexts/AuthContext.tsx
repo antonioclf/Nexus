@@ -38,8 +38,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setLoading(false);
     }, []);
 
-    const signIn = async () => {
-        // No-op for free access
+    const signIn = async (matricula: string, senha: string) => {
+        // No-op for free access, but parameters must exist for TypeScript
+        console.log('SignIn called in free access mode:', { matricula, senha });
         return { error: null };
     };
 

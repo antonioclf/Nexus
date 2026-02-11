@@ -1,0 +1,9 @@
+
+{
+  "name": "Sistema CBMMG - Pelotão Guaxupé",
+  "description": "Uma plataforma completa de gestão operacional para o Corpo de Bombeiros Militar, incluindo despacho de ocorrências, controle de viaturas, registros de abastecimento e estatísticas analíticas.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}

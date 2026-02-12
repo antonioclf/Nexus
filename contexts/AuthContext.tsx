@@ -29,11 +29,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [loading] = useState(false);
 
     const signIn = async (matricula: string, senha: string) => {
-        console.log('SignIn bypass:', { matricula, senha });
+        console.log('SignIn bypass active:', { matricula, senha });
         return { error: null };
     };
 
     const signOut = async () => {
+        console.log('SignOut bypass active');
         return { error: null };
     };
 

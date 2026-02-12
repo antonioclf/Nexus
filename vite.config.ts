@@ -15,17 +15,14 @@ export default defineConfig(({ mode }) => {
       react(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
         manifest: {
           name: 'Nexus CBMMG',
           short_name: 'Nexus',
-          description: 'Sistema Integrado de Gestão do 2º Pelotão de Bombeiros Militar - Guaxupé',
           theme_color: '#ee2b2b',
           background_color: '#1a0808',
           display: 'standalone',
           scope: '/',
           start_url: '/',
-          orientation: 'portrait',
           icons: [
             {
               src: 'pwa-192x192.png',

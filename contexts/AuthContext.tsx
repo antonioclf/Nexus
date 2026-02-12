@@ -1,24 +1,20 @@
+import React, { createContext, useContext, useState } from 'react';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Session, User } from '@supabase/supabase-js';
-
+// Simplified type to avoid dependency issues if types change
 interface AuthContextType {
-    session: Session | null;
-    user: User | null;
+    session: any;
+    user: any;
     loading: boolean;
     signIn: (matricula: string, senha: string) => Promise<{ error: any }>;
     signOut: () => Promise<{ error: any }>;
 }
 
-// Mock user for free access
-const MOCK_USER: User = {
+const MOCK_USER = {
     id: 'free-access-user',
     email: 'acesso@nexus.com',
-    app_metadata: {},
     user_metadata: { full_name: 'Acesso Livre' },
-    aud: 'authenticated',
-    created_at: new Date().toISOString(),
-} as User;
+    role: 'authenticated'
+};
 
 const AuthContext = createContext<AuthContextType>({
     session: null,
@@ -29,28 +25,20 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-    // Start with the mock user immediately
-    const [user] = useState<User | null>(MOCK_USER);
-    const [loading, setLoading] = useState(false);
-
-    useEffect(() => {
-        // No longer needed to check Supabase session
-        setLoading(false);
-    }, []);
+    const [user] = useState<any>(MOCK_USER);
+    const [loading] = useState(false);
 
     const signIn = async (matricula: string, senha: string) => {
-        // No-op for free access, but parameters must exist for TypeScript
-        console.log('SignIn called in free access mode:', { matricula, senha });
+        console.log('SignIn bypass:', { matricula, senha });
         return { error: null };
     };
 
     const signOut = async () => {
-        // No-op for free access
         return { error: null };
     };
 
     return (
-        <AuthContext.Provider value={{ session: null, user, loading, signIn, signOut }}>
+        <AuthContext.Provider value={{ session: { user: MOCK_USER }, user, loading, signIn, signOut }}>
             {children}
         </AuthContext.Provider>
     );

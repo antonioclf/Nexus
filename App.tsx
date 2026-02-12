@@ -12,7 +12,7 @@ import HistoricoAbastecimentoView from './views/HistoricoAbastecimentoView';
 import LancarAbastecimentoView from './views/LancarAbastecimentoView';
 import LoginView from './views/LoginView';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { INITIAL_VIATURAS, INITIAL_ABASTECIMENTOS } from './constants';
+import { INITIAL_VIATURAS, INITIAL_ABASTECIMENTOS, INITIAL_OCORRENCIAS } from './constants';
 
 const AppContent: React.FC = () => {
   const { user, loading } = useAuth();
@@ -39,7 +39,9 @@ const AppContent: React.FC = () => {
 
   const renderView = () => {
     // Fallback for props until views are refactored
-    const viatura = INITIAL_VIATURAS.find(v => v.id === selectedId) || INITIAL_VIATURAS[0];
+    const viatura = (INITIAL_VIATURAS && INITIAL_VIATURAS.length > 0)
+      ? (INITIAL_VIATURAS.find(v => v.id === selectedId) || INITIAL_VIATURAS[0])
+      : {} as any;
 
     switch (currentView) {
       case 'HOME':
@@ -50,7 +52,7 @@ const AppContent: React.FC = () => {
       case 'VIATURAS':
         return <ViaturasView onNavigate={handleNavigate} />;
       case 'ESTATISTICAS':
-        return <EstatisticasView onNavigate={handleNavigate} />;
+        return <EstatisticasView onNavigate={handleNavigate} ocorrencias={INITIAL_OCORRENCIAS} viaturas={INITIAL_VIATURAS} />;
       case 'DETALHE_VIATURA':
         return <DetalheViaturaView onNavigate={handleNavigate} viaturaId={selectedId} />;
       case 'NOVA_VIATURA':
